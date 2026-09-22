@@ -1,141 +1,140 @@
 #include <iostream>
-#include <vector>
-#include <string>
+#include <cmath>
 using namespace std;
 
-// Read number into a vector
-vector<int> readCardNumber();
-int getPrefix(vector<int> number, int k);
-bool prefixMatched(vector<int> number);
-int getSize(vector<int> number);
-int sumOfOddPlace(vector<int> number);
+// Function prototypes
+bool isValid(long long number);
+int sumOfDoubleEvenPlace(long long number);
 int getDigit(int number);
-int sumOfDoubleEvenPlace(vector<int> number);
-bool isValid(vector<int> number);
+int sumOfOddPlace(long long number);
+bool prefixMatched(long long number, int d);
+int getSize(long long d);
+long long getPrefix(long long number, int k);
 
-// Return true if sum of (sum of doubles) and (sum of odds) is divisible by 10 and prefixMatch is true
-bool isValid(vector<int> number)
+// getSize counts how many digits are in the number
+// It keeps dividing by 10 until nothing is left
+int getSize(long long d)
 {
-    if (((sumOfDoubleEvenPlace(number) + sumOfOddPlace(number)) % 10 == 0) &&
-        prefixMatched(number) &&
-        13 <= getSize(number) && getSize(number) <= 16)
+    if (d == 0)
+        return 0;
+
+    int count = 0;
+    while (d > 0)
     {
-        return true;
+        d = d / 10;
+        count++;
     }
-    else
-    {
-        return false;
-    }
+    return count;
 }
 
-int sumOfDoubleEvenPlace(vector<int> number)
+// getDigit takes a number and returns a single digit
+// If the number is already below 10, it returns it as is
+// If it is two digits, it adds the tens and ones together
+int getDigit(int number)
 {
+    if (number < 10)
+        return number;
+    else
+        return (number / 10) + (number % 10);
+}
+
+// sumOfOddPlace adds up all digits in odd positions from the right
+// Position 1 is the rightmost digit, position 3 is the next odd one, and so on
+int sumOfOddPlace(long long number)
+{
+    int position = 1;
     int sum = 0;
-    // Start at position i = 0 and increment through with steps of 2
-    for (int i = 0; i < (int)number.size(); i += 2)
+
+    while (number > 0)
     {
-        int digit = number[i];
-        // Double even number
-        digit = digit * 2;
-        sum += getDigit(digit);
+        int digit = number % 10;
+        if (position % 2 != 0)
+        {
+            sum += digit;
+        }
+        number = number / 10;
+        position++;
     }
     return sum;
 }
 
-// Return this number if it is a single digit, otherwise, return the sum of the two digits
-int getDigit(int number)
+// sumOfDoubleEvenPlace adds up all digits in even positions from the right
+// Each even-position digit is doubled first, then passed to getDigit
+int sumOfDoubleEvenPlace(long long number)
 {
-    if (number < 10)
+    int position = 1;
+    int sum = 0;
+
+    while (number > 0)
+    {
+        int digit = number % 10;
+        if (position % 2 == 0)
+        {
+            sum += getDigit(digit * 2);
+        }
+        number = number / 10;
+        position++;
+    }
+    return sum;
+}
+
+// getPrefix returns the first k digits of the number
+// For example, getPrefix(4388576018410707, 2) returns 43
+long long getPrefix(long long number, int k)
+{
+    int size = getSize(number);
+
+    if (size <= k)
     {
         return number;
     }
     else
     {
-        return number / 10 + number % 10;
+        return number / (long long)pow(10, size - k);
     }
 }
 
-// Return sum of odd place digits in number
-int sumOfOddPlace(vector<int> number)
+// prefixMatched checks if the number starts with d
+// It figures out how many digits d has, grabs that many from the front,
+// and compares the two
+bool prefixMatched(long long number, int d)
 {
-    int sum = 0;
-    for (int i = 1; i < (int)number.size(); i += 2)
-    {
-        sum += number[i];
-    }
-    return sum;
+    int k = getSize(d);
+    return getPrefix(number, k) == d;
 }
 
-// Return the number of digits in number
-int getSize(vector<int> number)
+// isValid ties everything together
+// It checks the length, the prefix, and the Luhn checksum
+bool isValid(long long number)
 {
-    return number.size();
-}
+    int size = getSize(number);
+    bool validLength = (size >= 13 && size <= 16);
 
-// Return true if the digit d is a prefix for number
-bool prefixMatched(vector<int> number)
-{
-    if ((getPrefix(number, 1)) == 4 ||
-        (getPrefix(number, 1)) == 5 ||
-        (getPrefix(number, 2)) == 37 ||
-        (getPrefix(number, 1)) == 6)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
+    bool validPrefix = (prefixMatched(number, 4) ||
+                        prefixMatched(number, 5) ||
+                        prefixMatched(number, 6) ||
+                        prefixMatched(number, 37));
 
-vector<int> readCardNumber()
-{
-    std::string number;
-    std::cout << "Enter number: \n";
-    std::cin >> number;
+    int total = sumOfDoubleEvenPlace(number) + sumOfOddPlace(number);
+    bool validChecksum = (total % 10 == 0);
 
-    std::vector<int> card_digits;
-
-    for (int i = 0; i < (int)number.size(); ++i)
-    {
-        // Convert number into an integer
-        card_digits.push_back(number[i] - '0');
-    }
-
-    return card_digits;
-}
-
-// Return the first k number of digits from number.
-int getPrefix(std::vector<int> number, int k)
-{
-    int k_prefix = 0;
-    int length = number.size();
-
-    if (k > length)
-    {
-        k = length;
-    }
-
-    for (int i = 0; i < k; i++)
-    {
-        k_prefix = k_prefix * 10 + number[i];
-    }
-
-    return k_prefix;
+    return validLength && validPrefix && validChecksum;
 }
 
 int main()
 {
-    vector<int> number = readCardNumber();
-    cout << "Prefix: " << getPrefix(number, 3) << "\n";
-    cout << "Matched: " << prefixMatched(number) << "\n";
-    cout << "Size: " << getSize(number) << "\n";
-    cout << "Sum of Odd Numbers: " << sumOfOddPlace(number) << "\n";
-    cout << "Sum of double even numbers: " << sumOfDoubleEvenPlace(number) << "\n";
-    cout << "Valid: " << isValid(number) << "\n";
+    long long cardnumber;
+    cout << "Enter a credit card number (add LL at the end): ";
+    cin >> cardnumber;
+
+    if (isValid(cardnumber))
+    {
+        cout << "The number " << cardnumber << " is valid";
+    }
+    else
+    {
+        cout << "The number " << cardnumber << " is invalid";
+    }
 
     return 0;
 }
-
-
-
