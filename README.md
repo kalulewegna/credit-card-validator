@@ -1,9 +1,17 @@
-This program checks if a credit card number is valid. It uses the Luhn algorithm. That algorithm was made by Hans Luhn at IBM in the 1950s. It is still used today.
+This is a credit card validator. It takes a card number and tells you if it's valid or not.
 
-The program checks three things. First, the length. The number must have 13 to 16 digits. Second, the prefix. Visa starts with 4. MasterCard starts with 5. American Express starts with 37. Discover starts with 6. Third, the Luhn checksum.
+The validation is based on the Luhn algorithm. Hans Luhn came up with it at IBM in the 1950s and card companies still use it today.
 
-For the checksum, the program reads the number from right to left. Digits in odd positions are added as they are. Odd positions are the 1st, 3rd, 5th from the right. Digits in even positions are doubled first. If doubling gives two digits, those two digits are added together. For example, 8 doubled is 16. Then 1 plus 6 is 7. All the results are added up. If the total is divisible by 10, the number passes.
+A card number has to pass three checks. It needs 13 to 16 digits. It has to start with 4, 5, 6, or 37 depending on the card type. And it has to pass the Luhn checksum.
 
-The code is split into small functions. getSize counts how many digits a number has. It divides by 10 over and over and counts each time. getDigit returns a single digit. If the number is below 10, it returns it as is. Otherwise it adds the two digits together. sumOfOddPlace adds up the digits in odd positions. sumOfDoubleEvenPlace doubles the digits in even positions and adds them up. getPrefix returns the first k digits of a number. prefixMatched checks if a number starts with a given digit. isValid puts it all together. It checks the length, the prefix, and the Luhn sum. It returns true only if all three pass.
+The checksum works by walking through the number from right to left. Digits in odd positions get added as they are. Digits in even positions get doubled first. If doubling gives you two digits, you add those two together. So 8 doubled is 16, and 1 plus 6 is 7. Then everything gets added up. If the total is divisible by 10, it passes.
 
-A valid number is 4388576018410707. An invalid one is 4388576018402626.
+The code is broken into small functions. "getSize" tells  how many digits a number has. It does this by dividing by 10 repeatedly.
+ getDigit returns a single digit. If the number is under 10 it returns it as is, otherwise it adds the two digits together.
+Then  "sumOfOddPlace" adds up the odd-position digits. 
+"sumOfDoubleEvenPlace" doubles the even-position digits and adds them. 
+"getPrefix" gives you the first k digits of a number. 
+prefixMatched checks if a number starts with a specific digit. 
+"isValid" calls all of them and returns true only if the length, prefix, and checksum all pass.
+
+Try it with 4388576018410707. That one is valid. 4388576018402626 is not.
